@@ -5,7 +5,7 @@ import type { Hono } from 'hono';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createApp } from '../src/app.js';
 
-type Line = { at: string; job: string; status: string; owner?: string; error?: string };
+type Line = { at: string; job: string; status: string; owner: string | null; error?: string };
 
 const lines = (rows: Line[]) => rows.map((r) => JSON.stringify(r)).join('\n') + '\n';
 
@@ -19,7 +19,7 @@ const goodRuns: Line[] = [
   { at: '2026-10-20T23:00:03+01:00', job: 'lane/sync', status: 'ok', owner: 'rook' },
   { at: '2026-10-20T23:00:05+01:00', job: 'rig/rotate-logs', status: 'ok', owner: 'lane-07' },
   { at: '2026-10-21T01:00:04+01:00', job: 'lane/sync', status: 'fail', owner: 'rook', error: 'timeout' },
-  { at: '2026-10-21T02:00:00+01:00', job: 'billing/export', status: 'ok' },
+  { at: '2026-10-21T02:00:00+01:00', job: 'billing/export', status: 'ok', owner: null },
 ];
 const goodJobs = ['billing/export', 'lane/sync', 'rig/rotate-logs'];
 

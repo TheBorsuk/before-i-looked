@@ -1,8 +1,9 @@
 ---
 plan: morning-digest
-status: ready
+status: done
 owner: rook
 opened: 2026-10-29
+closed: 2026-10-29
 ---
 
 # Morning digest
@@ -77,3 +78,20 @@ page again with `LANE_MARKER` unset (the banner reads "no marker set") and uploa
 link. Move this plan to `docs/plans/done/` with its issue list.
 
 Done when: the preview link no longer shows the lane marker.
+
+## Issues
+
+| # | Issue | Blocked by | Worker | Closed |
+|---|-------|-----------|--------|--------|
+| 1 | Digest types: DigestRow and readNight signature | — | omp · claude-sonnet-5-5 · low | 2026-10-29 |
+| 2 | Run log reader: readNight(runsDir, night) | #1 | omp · claude-sonnet-5-5 · low | 2026-10-29 |
+| 3 | Digest page: GET /digest/:night | #1 | omp · claude-sonnet-5-5 · low | 2026-10-29 |
+| 4 | Digest JSON: GET /api/digest/:night | #1 | omp · claude-sonnet-5-5 · low | 2026-10-29 |
+| 5 | Status board: link each night to its digest with counts | #1 | omp · claude-sonnet-5-5 · low | 2026-10-29 |
+| 6 | Route tests for the digest page and JSON | #1 | omp · claude-sonnet-5-5 · low | 2026-10-29 |
+| 7 | Preview for review: digest 2026-10-28 on GitHub Pages | #3, #5, #6 | omp · claude-sonnet-5-5 · low | 2026-10-29 |
+| 8 | Clean up: take the lane marker off the preview | #7, reviewer's reply | omp · claude-opus-5-5 · low | 2026-10-29 |
+
+Board counts are jobs by last status (human's decision on #5). Review fixes (shared night rule, all-bad
+night text, test trims, workflow diagnostics) landed after #1–#7 on `morning-digest`. #7 was closed
+once before the reviewer looked and reopened until they had.

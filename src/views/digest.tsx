@@ -18,7 +18,7 @@ export function DigestPage({ night, result }: { night: string; result: Exclude<N
       <h1>digest {night}</h1>
       {badLines > 0 ? <p class="warn">{unreadable(badLines)}</p> : null}
       {rows.length === 0 ? (
-        <p class="mute">nothing ran</p>
+        badLines === 0 ? <p class="mute">nothing ran</p> : null
       ) : (
         <table>
           <thead>

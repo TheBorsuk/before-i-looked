@@ -13,6 +13,7 @@ const GOOD_NIGHT = '2026-10-20';
 const EMPTY_NIGHT = '2026-10-21';
 const BAD_NIGHT = '2026-10-22';
 const MISSING_NIGHT = '2026-10-23';
+const ALL_BAD_NIGHT = '2026-10-24';
 
 // Written out of job order on purpose: the reader sorts by job.
 const goodRuns: Line[] = [
@@ -38,6 +39,7 @@ beforeAll(() => {
   writeFileSync(join(runsDir, `${GOOD_NIGHT}.jsonl`), lines(goodRuns));
   writeFileSync(join(runsDir, `${EMPTY_NIGHT}.jsonl`), '');
   writeFileSync(join(runsDir, `${BAD_NIGHT}.jsonl`), badRuns);
+  writeFileSync(join(runsDir, `${ALL_BAD_NIGHT}.jsonl`), 'nope\n{"at":\n');
   app = createApp({
     adapter: 'shim',
     installed: '2026-10-29T14:06:00+01:00',
@@ -97,6 +99,14 @@ describe('GET /digest/:night', () => {
     const html = await (await app.request(`/digest/${GOOD_NIGHT}`)).text();
     expect(html).not.toContain('could not be read');
   });
+
+  it('shows only the unreadable count when every line is bad', async () => {
+    const res = await app.request(`/digest/${ALL_BAD_NIGHT}`);
+    const html = await res.text();
+    expect(res.status).toBe(200);
+    expect(html).toContain('2 lines could not be read');
+    expect(html).not.toContain('nothing ran');
+  });
 });
 
 describe('GET /api/digest/:night', () => {
@@ -127,6 +137,36 @@ describe('GET /api/digest/:night', () => {
     const body = (await res.json()) as Digest;
     expect(body.badLines).toBe(1);
     expect(body.rows.map((r) => r.job)).toEqual(badJobs);
+  });
+});
+
+describe('the real runs/ log', () => {
+  const real = createApp({
+    adapter: 'shim',
+    installed: '2026-10-29T14:06:00+01:00',
+    beatEverySeconds: 60,
+    runsDir: 'runs',
+  });
+
+  it('serves 2026-10-28 sorted by job, with the cut-off line counted as bad', async () => {
+    const res = await real.request('/api/digest/2026-10-28');
+    const body = (await res.json()) as Digest;
+    expect(res.status).toBe(200);
+    expect(body.night).toBe('2026-10-28');
+    expect(body.rows.map((r) => r.job)).toEqual([
+      'digest/render',
+      'fixtures/refresh',
+      'lane/sync',
+      'notes/backup',
+      'rig/rotate-logs',
+    ]);
+    expect(body.badLines).toBe(1);
+  });
+
+  it('answers 404 JSON for a night that is not a date', async () => {
+    const res = await real.request('/api/digest/..%2Fconfig');
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: 'no such night' });
   });
 });
 

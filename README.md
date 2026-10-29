@@ -10,3 +10,9 @@ pnpm dev               # http://localhost:8787
 ```
 
 Working on it with an agent: start at [AGENTS.md](AGENTS.md).
+
+## Preview
+
+The digest preview is published by the `preview` workflow to https://theborsuk.github.io/before-i-looked/. Run it with `gh workflow run preview.yml`; a human approves the deploy.
+The lane marker on the page comes from the repo secret `LANE_MARKER`.
+Clean-up (ADR 0003): `gh secret delete LANE_MARKER`, then run the workflow again; the banner then reads "no marker set".

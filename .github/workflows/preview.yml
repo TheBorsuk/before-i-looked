@@ -1,0 +1,76 @@
+name: preview
+
+# Publishes /digest/2026-10-28 as one static HTML file on GitHub Pages.
+# Manual only: a human approves every deploy (ADR 0003).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      # No lockfile in the repo, so CI's default --frozen-lockfile cannot apply.
+      - run: pnpm install --no-frozen-lockfile
+
+      # An unset secret is an empty string: the banner then reads "no marker set".
+      - name: Start rig
+        env:
+          LANE_MARKER: ${{ secrets.LANE_MARKER }}
+          PORT: '8787'
+        run: nohup pnpm start > rig.log 2>&1 &
+
+      - name: Wait for rig
+        run: |
+          for _ in $(seq 1 30); do
+            curl -fsS http://localhost:8787/health > /dev/null 2>&1 && exit 0
+            sleep 1
+          done
+          echo 'rig did not come up within 30s' >&2
+          exit 1
+
+      - name: Save the page
+        run: |
+          mkdir -p _site
+          curl -fsS http://localhost:8787/digest/2026-10-28 -o _site/index.html
+
+      - name: Check the page is self-contained
+        run: |
+          grep -q '<table' _site/index.html || { echo 'no <table in the page' >&2; exit 1; }
+          if grep -q '<script' _site/index.html; then
+            echo 'page contains <script (ADR 0001)' >&2
+            exit 1
+          fi
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+          retention-days: 1
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

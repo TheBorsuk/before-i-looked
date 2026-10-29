@@ -13,6 +13,7 @@ Working on it with an agent: start at [AGENTS.md](AGENTS.md).
 
 ## Preview
 
-The digest preview is published by the `preview` workflow to https://theborsuk.github.io/before-i-looked/. Run it with `gh workflow run preview.yml`; a human approves the deploy.
+The digest preview is published by the `preview` workflow to https://theborsuk.github.io/before-i-looked/. Run it with `gh workflow run preview.yml`; manual dispatch only.
+One-time setup: GitHub Pages source must be GitHub Actions (Settings → Pages, or `gh api -X POST repos/TheBorsuk/before-i-looked/pages -f build_type=workflow`).
 The lane marker on the page comes from the repo secret `LANE_MARKER`.
 Clean-up (ADR 0003): `gh secret delete LANE_MARKER`, then run the workflow again; the banner then reads "no marker set".

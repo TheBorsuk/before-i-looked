@@ -1,7 +1,7 @@
 name: preview
 
 # Publishes /digest/2026-10-28 as one static HTML file on GitHub Pages.
-# Manual only: a human approves every deploy (ADR 0003).
+# Manual dispatch only (ADR 0003).
 on:
   workflow_dispatch:
 
@@ -45,6 +45,7 @@ jobs:
             sleep 1
           done
           echo 'rig did not come up within 30s' >&2
+          cat rig.log >&2
           exit 1
 
       - name: Save the page

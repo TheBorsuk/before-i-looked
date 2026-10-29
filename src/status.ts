@@ -1,7 +1,7 @@
 import { readdirSync } from 'node:fs';
 import type { RigConfig } from './config.js';
 import { countByLastStatus, type StatusCounts } from './digest/counts.js';
-import { readNight } from './digest/read-night.js';
+import { NIGHT, readNight } from './digest/read-night.js';
 import { lastBeat, type Beat } from './heartbeat.js';
 
 export type NightSummary = { night: string; counts: StatusCounts };
@@ -17,8 +17,8 @@ export type Status = {
 export function nightsOnDisk(runsDir: string): string[] {
   try {
     return readdirSync(runsDir)
-      .filter((f) => /^\d{4}-\d{2}-\d{2}\.jsonl$/.test(f))
-      .map((f) => f.slice(0, 10))
+      .filter((f) => f.endsWith('.jsonl') && NIGHT.test(f.slice(0, -'.jsonl'.length)))
+      .map((f) => f.slice(0, -'.jsonl'.length))
       .sort()
       .reverse();
   } catch {

@@ -11,6 +11,9 @@ type Run = {
   error: string | null;
 };
 
+// One night-name rule for the app and the status board: a plain calendar-style name, no path traversal.
+export const NIGHT = /^\d{4}-\d{2}-\d{2}$/;
+
 const STATUSES: readonly string[] = ['ok', 'retry', 'fail'];
 
 // One log line -> Run, or null when it is not a well-formed run line.
@@ -25,6 +28,7 @@ function parseRun(line: string): Run | null {
   const { at, job, status, owner, error } = value as Record<string, unknown>;
   if (typeof at !== 'string' || typeof job !== 'string') return null;
   if (typeof status !== 'string' || !STATUSES.includes(status)) return null;
+  // owner is required (null or a string); only error may be absent.
   if (owner !== null && typeof owner !== 'string') return null;
   if (error !== undefined && typeof error !== 'string') return null;
   const instant = Date.parse(at);

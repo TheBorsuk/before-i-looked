@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { loadConfig, type RigConfig } from './config.js';
+import { readNight } from './digest/read-night.js';
 import { lane } from './lane.js';
 import { readStatus } from './status.js';
 import { Layout } from './views/layout.js';
@@ -17,6 +18,14 @@ export function createApp(config: RigConfig = loadConfig()) {
       </Layout>,
     ),
   );
+
+  app.get('/api/digest/:night', (c) => {
+    const night = c.req.param('night');
+    const result = /^\d{4}-\d{2}-\d{2}$/.test(night) ? readNight(config.runsDir, night) : { kind: 'missing' as const };
+    if (result.kind === 'missing') return c.json({ error: 'no such night' }, 404);
+    if (result.kind === 'empty') return c.json({ night, rows: [], badLines: 0 });
+    return c.json({ night, rows: result.rows, badLines: result.badLines });
+  });
 
   return app;
 }

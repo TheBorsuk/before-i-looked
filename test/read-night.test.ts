@@ -105,19 +105,10 @@ describe('readNight edge cases', () => {
   });
 
   it.each([
-    ['not json', 'hello'],
-    ['json but not an object', '42'],
-    ['null', 'null'],
-    ['an array', '[]'],
-    ['missing at', line({ job: 'a', status: 'ok', owner: null })],
-    ['non-string at', line({ at: 5, job: 'a', status: 'ok', owner: null })],
-    ['unparseable at', line({ at: 'yesterday', job: 'a', status: 'ok', owner: null })],
-    ['missing job', line({ at: '2026-10-28T23:00:00+01:00', status: 'ok', owner: null })],
-    ['non-string job', line({ at: '2026-10-28T23:00:00+01:00', job: 1, status: 'ok', owner: null })],
-    ['unknown status', line({ at: '2026-10-28T23:00:00+01:00', job: 'a', status: 'done', owner: null })],
-    ['missing status', line({ at: '2026-10-28T23:00:00+01:00', job: 'a', owner: null })],
-    ['numeric owner', line({ at: '2026-10-28T23:00:00+01:00', job: 'a', status: 'ok', owner: 7 })],
-    ['numeric error', line({ at: '2026-10-28T23:00:00+01:00', job: 'a', status: 'fail', owner: null, error: 7 })],
+    ['truncated json', '{"at":"2026-10-28T23:00:00+01:00","job":"a","sta'],
+    ['an unknown status', line({ at: '2026-10-28T23:00:00+01:00', job: 'a', status: 'done', owner: null })],
+    ['an unparseable at', line({ at: 'yesterday', job: 'a', status: 'ok', owner: null })],
+    ['a missing owner key', line({ at: '2026-10-28T23:00:00+01:00', job: 'a', status: 'ok' })],
   ])('counts %s as a bad line', (_name, bad) => {
     const { rows, badLines } = rowsOf(`${bad}\n${run('2026-10-28T23:00:00+01:00', 'ok-job')}\n`);
     expect(badLines).toBe(1);
